@@ -64,4 +64,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function audioFiles()
+    {
+        return $this->hasMany(AudioFile::class);
+    }
 }

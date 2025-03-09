@@ -20,6 +20,8 @@ class AudioFile extends Model
         'transcription_job_name',
         'status',
         'transcript_text',
+        'error_message',
+        'completed_at',
     ];
 
     /**
@@ -30,6 +32,7 @@ class AudioFile extends Model
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     /**

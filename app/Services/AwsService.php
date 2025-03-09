@@ -45,7 +45,17 @@ class AwsService
      */
     public function uploadFile(string $filePath, string $key): string
     {
-        if (!Storage::disk('s3')->put($key, file_get_contents($filePath))) {
+        $fileContents = file_get_contents($filePath);
+        if ($fileContents === false) {
+            throw new RuntimeException('Failed to read file contents');
+        }
+
+        $result = Storage::disk('s3')->put($key, $fileContents, [
+            'visibility' => 'private',
+            'ContentType' => mime_content_type($filePath)
+        ]);
+
+        if (!$result) {
             throw new RuntimeException('Failed to upload file to S3');
         }
 
@@ -57,7 +67,7 @@ class AwsService
      */
     public function startTranscription(string $jobName, string $mediaUri, string $languageCode = 'en-US'): array
     {
-        return $this->transcribeClient->startTranscriptionJob([
+        $result = $this->transcribeClient->startTranscriptionJob([
             'TranscriptionJobName' => $jobName,
             'Media' => [
                 'MediaFileUri' => $mediaUri
@@ -65,6 +75,8 @@ class AwsService
             'MediaFormat' => pathinfo($mediaUri, PATHINFO_EXTENSION),
             'LanguageCode' => $languageCode,
         ]);
+
+        return $result->toArray();
     }
 
     /**
@@ -72,9 +84,11 @@ class AwsService
      */
     public function getTranscriptionStatus(string $jobName): array
     {
-        return $this->transcribeClient->getTranscriptionJob([
+        $result = $this->transcribeClient->getTranscriptionJob([
             'TranscriptionJobName' => $jobName
         ]);
+
+        return $result->toArray();
     }
 
     /**

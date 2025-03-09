@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('transcription_job_name')->nullable();
             $table->enum('status', ['uploaded', 'transcribing', 'completed', 'failed']);
             $table->text('transcript_text')->nullable();
+            $table->timestamp('completed_at')->nullable()->after('error_message');
             $table->timestamps();
         });
     }
