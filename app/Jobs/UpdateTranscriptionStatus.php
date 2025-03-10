@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\AudioFile;
+use App\Notifications\TranscriptionFinished;
 use App\Services\AwsService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -36,7 +37,7 @@ class UpdateTranscriptionStatus implements ShouldQueue
     public function handle(AwsService $awsService): void
     {
         Log::info('Starting transcription status update job');
-        
+
         $transcribingFiles = AudioFile::where('status', 'transcribing')
             ->where('created_at', '>=', now()->subHours(24))
             ->get();
@@ -67,7 +68,7 @@ class UpdateTranscriptionStatus implements ShouldQueue
     private function processTranscriptionFile(AudioFile $file, AwsService $awsService): void
     {
         Log::info("Checking status for file: {$file->id}");
-        
+
         $transcriptionStatus = $awsService->getTranscriptionStatus($file->transcription_job_name);
         $status = strtolower($transcriptionStatus['TranscriptionJob']['TranscriptionJobStatus']);
 
@@ -75,16 +76,16 @@ class UpdateTranscriptionStatus implements ShouldQueue
             case 'completed':
                 $this->handleCompletedTranscription($file, $transcriptionStatus, $awsService);
                 break;
-            
+
             case 'failed':
             case 'error':
                 $this->handleFailedTranscription($file, $transcriptionStatus);
                 break;
-            
+
             case 'in_progress':
                 Log::info("Transcription still in progress for file: {$file->id}");
                 break;
-            
+
             default:
                 Log::warning("Unknown transcription status '{$status}' for file: {$file->id}");
         }
@@ -97,12 +98,17 @@ class UpdateTranscriptionStatus implements ShouldQueue
     {
         $transcriptUrl = $status['TranscriptionJob']['Transcript']['TranscriptFileUri'];
         $transcriptText = $awsService->getTranscriptionResult($transcriptUrl);
-        
+
         $file->update([
             'status' => 'completed',
             'transcript_text' => $transcriptText,
             'completed_at' => now()
         ]);
+
+        $file->user->notify(new TranscriptionFinished(
+            $file->transcription_job_name,
+            route('audio-files.show', $file)
+        ));
 
         Log::info("Successfully updated transcript for file: {$file->id}");
     }
@@ -113,7 +119,7 @@ class UpdateTranscriptionStatus implements ShouldQueue
     private function handleFailedTranscription(AudioFile $file, array $status): void
     {
         $errorMessage = $status['TranscriptionJob']['FailureReason'] ?? 'Unknown error';
-        
+
         $file->update([
             'status' => 'failed',
             'error_message' => $errorMessage
