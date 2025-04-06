@@ -46,7 +46,7 @@ class AudioFileController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'audio_file' => ['required', 'file', 'mimes:mp3,wav,m4a,flac', 'max:50000']
+            'audio_file' => ['required', 'file', 'mimes:mp3,wav,m4a,flac', 'max:100000']
         ]);
 
         $file = $request->file('audio_file');
