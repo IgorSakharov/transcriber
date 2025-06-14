@@ -71,7 +71,7 @@ The application’s functionality revolves around uploading audio files, process
 - **Description**: Since transcription jobs are asynchronous, the application must periodically check their status and retrieve the transcribed text when complete.
 - **Approach**: Use a polling mechanism (e.g., a scheduled task in Laravel) to monitor job status.
 - **Steps**:
-  - Create a scheduled task (e.g., a Laravel console command `transcription:check-status`) that runs every minute.
+  - Create a scheduled task (e.g., a Laravel console command `transcriptions:update`) that runs every three minutes.
   - Query all `AudioFile` records where `status` is `transcribing`.
   - For each record:
     - Call `GetTranscriptionJob` with the `transcription_job_name`.
