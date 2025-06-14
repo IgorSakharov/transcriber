@@ -63,17 +63,24 @@ class AwsService
     }
 
     /**
-     * Start a transcription job
+     * Start a transcription job.
+     *
+     * @param string      $jobName      Name for the transcription job
+     * @param string      $mediaUri     S3 URI of the media file
+     * @param string|null $languageCode Optional language code. Defaults to the configured language
      */
-    public function startTranscription(string $jobName, string $mediaUri, string $languageCode = 'en-US'): array
+    public function startTranscription(string $jobName, string $mediaUri, ?string $languageCode = null): array
     {
+        $languageCode = $languageCode ?? $this->defaultLanguage;
+
         $result = $this->transcribeClient->startTranscriptionJob([
             'TranscriptionJobName' => $jobName,
             'Media' => [
-                'MediaFileUri' => $mediaUri
+                'MediaFileUri' => $mediaUri,
             ],
-            'MediaFormat' => pathinfo($mediaUri, PATHINFO_EXTENSION),
+            'MediaFormat' => strtolower(pathinfo($mediaUri, PATHINFO_EXTENSION)),
             'LanguageCode' => $languageCode,
+            'OutputBucketName' => $this->outputBucket,
         ]);
 
         return $result->toArray();
