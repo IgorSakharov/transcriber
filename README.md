@@ -32,17 +32,16 @@ On first run without a saved key, you will be prompted to enter it. The key is s
 
 ## Apple Shortcuts
 
-1. Add a **Run Shell Script** action
-2. Set **Shell** to `/bin/zsh`
-3. Set **Input** to the audio file from a previous action (e.g. "Get File", "Record Audio")
-4. Paste this script:
+1. Add a **Filter Files** action to select audio files (wav, mp3, m4a, etc.)
+2. Add a **Repeat with each item** action
+3. Inside the loop, add a **Run Shell Script** action and paste:
 
 ```sh
-#!/bin/zsh
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 transcriber "$1"
 ```
 
-5. The action output contains the transcript — pipe it into **Copy to Clipboard**, **Create Text File**, or any other action.
+4. Set **Shell** to `zsh`, **Input** to `Repeat Item`, **Pass Input** to `as arguments`
+5. The repeat results contain the transcripts — pipe into **Copy to Clipboard**, **Save File**, or any other action.
 
 > **Note:** The API key must be set before using in Shortcuts. Run `transcriber set-key sk-...` once in Terminal.
