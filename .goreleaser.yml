@@ -24,10 +24,10 @@ archives:
 brews:
   - name: transcriber
     repository:
-      owner: ihorsakharov
+      owner: IgorSakharov
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    homepage: "https://github.com/ihorsakharov/transcriber"
+    homepage: "https://github.com/IgorSakharov/transcriber"
     description: "CLI tool to transcribe audio files via OpenAI Whisper"
     install: |
       bin.install "transcriber"
