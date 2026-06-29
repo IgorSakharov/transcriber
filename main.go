@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -53,14 +55,13 @@ func main() {
 				return err
 			}
 
-			if outputPath != "" {
-				if err := os.WriteFile(outputPath, []byte(result+"\n"), 0644); err != nil {
-					return err
-				}
-				fmt.Fprintln(os.Stderr, "Saved to", outputPath)
-			} else {
-				fmt.Println(result)
+			if outputPath == "" {
+				outputPath = strings.TrimSuffix(args[0], filepath.Ext(args[0])) + ".txt"
 			}
+			if err := os.WriteFile(outputPath, []byte(result+"\n"), 0644); err != nil {
+				return err
+			}
+			fmt.Fprintln(os.Stderr, "Saved to", outputPath)
 			return nil
 		},
 	}
