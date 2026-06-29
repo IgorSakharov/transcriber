@@ -50,6 +50,11 @@ func main() {
 				return err
 			}
 
+			if err := acquireLock(args[0]); err != nil {
+				return err
+			}
+			defer releaseLock(args[0])
+
 			result, err := transcribeFile(apiKey, args[0])
 			if err != nil {
 				return err
